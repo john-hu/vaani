@@ -1,8 +1,11 @@
 import Debug from 'debug';
 import AppStore from '../stores/app';
+import AppActions from '../stores/app-actions';
 import Vaani from '../lib/vaani';
 import AppLauncher from '../lib/app-launcher';
 import TalkieActions from './talkie';
+import ActionsHelper from './actions-helper';
+import ActivityHelper from './activity-helper';
 
 
 let debug = Debug('StandingByActions');
@@ -15,27 +18,16 @@ class StandingByActions {
   static setupSpeech () {
     debug('setupSpeech');
 
+    var grammars =  `
+      #JSGF v1.0;
+      grammar fxosVoiceCommands;
+    `;
+    Object.keys(AppActions.actions).forEach(function(action) {
+      grammars += ActionsHelper.getActionGrammar(action);
+    });
+
     this.vaani = new Vaani({
-      grammar: `
-        #JSGF v1.0;
-        grammar fxosVoiceCommands;
-        public <simple> =
-          open phone |
-          open messages |
-          open email |
-          open contacts |
-          open browser |
-          open gallery |
-          open camera |
-          open marketplace |
-          open clock |
-          open settings |
-          open calendar |
-          open music |
-          open video |
-          open calculator
-        ;
-      `,
+      grammar: grammars,
       interpreter: this._interpreter.bind(this),
       onSay: this._onSay.bind(this),
       onSayDone: this._onSayDone.bind(this),
@@ -71,73 +63,28 @@ class StandingByActions {
       return;
     }
 
-    if (command.indexOf('open') > -1) {
-      var appRequested, appToLaunch, entryPoint;
+    var actions = Object.keys(AppActions.actions);
+    var action = actions.find(function(act) {
+      return ActionsHelper.probeAction(act, command);
+    });
 
-      if (command.indexOf('phone') > -1) {
-        appToLaunch = 'communications';
-        appRequested = 'phone';
-        entryPoint = 'dialer';
-      }
-      else if (command.indexOf('messages') > -1) {
-        appToLaunch = 'messages';
-      }
-      else if (command.indexOf('email') > -1) {
-        appToLaunch = 'e-mail';
-      }
-      else if (command.indexOf('contacts') > -1) {
-        appToLaunch = 'communications';
-        appRequested = 'contacts';
-        entryPoint = 'contacts';
-      }
-      else if (command.indexOf('browser') > -1) {
-        appToLaunch = 'browser';
-      }
-      else if (command.indexOf('gallery') > -1) {
-        appToLaunch = 'gallery';
-      }
-      else if (command.indexOf('camera') > -1) {
-        appToLaunch = 'camera';
-      }
-      else if (command.indexOf('marketplace') > -1) {
-        appToLaunch = 'marketplace';
-      }
-      else if (command.indexOf('clock') > -1) {
-        appToLaunch = 'clock';
-      }
-      else if (command.indexOf('settings') > -1) {
-        appToLaunch = 'settings';
-      }
-      else if (command.indexOf('calendar') > -1) {
-        appToLaunch = 'calendar';
-      }
-      else if (command.indexOf('music') > -1) {
-        appToLaunch = 'music';
-      }
-      else if (command.indexOf('video') > -1) {
-        appToLaunch = 'video';
-      }
-      else if (command.indexOf('calculator') > -1) {
-        appToLaunch = 'calculator';
-      }
-      else {
-        debug('Unable to interpret open command.', command);
+    if (!action) {
+      debug('No action matched.', command);
 
-        this.vaani.say('I could not find that app.');
-
-        return;
-      }
-
-      appRequested = appRequested || appToLaunch;
-
-      AppLauncher.launch(appToLaunch, entryPoint, (err) => {
-        if (err) {
-          debug('AppLauncher error', err);
-
-          this.vaani.say('I was not able to open ' + appRequested + '.');
-        }
-      });
+      this.vaani.say('I cannot understand your command.');
+      return;
     }
+
+    var param = ActionsHelper.parseResult(action, command);
+    if (!param) {
+      debug('Unable to interpret command.', command);
+
+      this.vaani.say('I cannot understand the object of your command.');
+
+      return;
+    }
+
+    ActivityHelper.sendActivity(AppActions.actions[action][0], param);
   }
 
   /**

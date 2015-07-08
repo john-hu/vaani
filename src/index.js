@@ -1,6 +1,7 @@
 /* global document */
 import Debug from 'debug';
 import AppStore from './stores/app';
+import AppActions from './stores/app-actions';
 import DisplayActions from './actions/display';
 import './components/community';
 import './components/display';
@@ -13,6 +14,10 @@ import './components/standing-by';
 
 window.myDebug = Debug;
 
+/*
+ * start to parse custom commands.
+ */
+AppActions.init();
 
 /*
  * first time use stuff
