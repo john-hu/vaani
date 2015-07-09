@@ -1,8 +1,8 @@
 import Debug from 'debug';
 
-let debug = Debug('ActivityHelper');
+let debug = Debug('ActivityLauncher');
 
-class ActivityHelper {
+class ActivityLauncher {
   static formalizeActivityData(data, args) {
     debug('formalizeActivityData', arguments);
     var jsonText = JSON.stringify(data);
@@ -13,7 +13,7 @@ class ActivityHelper {
   }
 
   static sendActivity(action, args) {
-    var data = ActivityHelper.formalizeActivityData(action.activityData, args);
+    var data = this.formalizeActivityData(action.activityData, args);
     new MozActivity({
       'name': action.activityName,
       'data': data
@@ -21,4 +21,4 @@ class ActivityHelper {
   }
 }
 
-export default ActivityHelper;
+export default ActivityLauncher;

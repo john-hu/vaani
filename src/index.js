@@ -18,7 +18,7 @@ window.myDebug = Debug;
 /*
  * start to parse custom commands.
  */
-AppActions.init();
+AppActions.parseAppActions();
 
 /*
  * init activity handler

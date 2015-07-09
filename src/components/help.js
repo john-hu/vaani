@@ -1,8 +1,8 @@
 import 'gaia-dialog/gaia-dialog-alert';
 import GaiaComponent from 'gaia-component';
 import ToolbarActions from '../actions/toolbar';
-import ActionsHelper from '../actions/actions-helper';
 import AppActions from '../stores/app-actions';
+import ActionsFactory from '../predefined-actions/actions-factory';
 
 
 var Help = GaiaComponent.register('vaani-help', {
@@ -13,7 +13,7 @@ var Help = GaiaComponent.register('vaani-help', {
     if (AppActions.actions) {
       Object.keys(AppActions.actions).forEach(function(action) {
         var p = document.createElement('p');
-        p.textContent = ActionsHelper.getDisplayText(action);
+        p.textContent = ActionsFactory.getDisplayText(action);
         this.dialog.appendChild(p);
       }.bind(this));
     }

@@ -1,13 +1,28 @@
+import AppLauncher from '../lib/app-launcher'
+
 var AppActions = {
   /**
    * Initialize the app actions. It reads actions from manifests.
    */
-  init: function() {
-    var allApps = navigator.mozApps.mgmt.getAll();
-    allApps.onsuccess = () => {
+  parseAppActions: function() {
+    // actions structure:
+    // var a = {
+    //   '{ActionName}': {
+    //     '{TargetType}': [
+    //       { 'InvokeMethodProperty': 'InvokeMethodValue' }
+    //     ]
+    //   }
+    // };
+    // ActionName is comprised of action and object, like:
+    //   DialAction-, OpenAction-SoftwareApplication.
+    // example of target type, invoke method, and value:
+    //    'activity': [{
+    //      'activityName': command.target.activity.name,
+    //      'activityData': command.target.activity.data
+    //    }]
+    AppLauncher.listApps((err, apps) => {
       var actions = {};
-      var list = allApps.result;
-      list.forEach(function(app) {
+      apps.forEach(function(app) {
         var manifest = app.manifest;
         if (manifest.custom_commands) {
           manifest.custom_commands.forEach(
@@ -22,21 +37,8 @@ var AppActions = {
           });
         }
       });
-      // actions structure:
-      // var a = {
-      //   '{ActionName}': {
-      //     '{TargetType}': [
-      //       { 'InvokeMethodProperty': 'InvokeMethodValue' }
-      //     ]
-      //   }
-      // };
-      // example of target type, invoke method, and value:
-      //    'activity': [{
-      //      'activityName': command.target.activity.name,
-      //      'activityData': command.target.activity.data
-      //    }]
       AppActions.actions = actions;
-    };
+    });
   },
 
   _parseActions: function(actions, command) {

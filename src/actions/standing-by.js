@@ -1,10 +1,10 @@
 import Debug from 'debug';
 import AppStore from '../stores/app';
 import AppActions from '../stores/app-actions';
+import ActivityLauncher from '../lib/activity-launcher';
 import Vaani from '../lib/vaani';
 import TalkieActions from './talkie';
-import ActionsHelper from './actions-helper';
-import ActivityHelper from './activity-helper';
+import ActionsFactory from '../predefined-actions/actions-factory';
 
 
 let debug = Debug('StandingByActions');
@@ -17,13 +17,15 @@ class StandingByActions {
   static setupSpeech () {
     debug('setupSpeech');
 
+    this.actionParsers = ActionsFactory.createActions();
+
     var grammars =  `
       #JSGF v1.0;
       grammar fxosVoiceCommands;
       public <fxcmd> = `;
     var candidates = [];
     Object.keys(AppActions.actions).forEach((action) => {
-      candidates.push(ActionsHelper.getActionGrammar(action));
+      candidates.push(this.actionParsers[action].grammar);
     });
     grammars += candidates.join(' | \n') + ';';
     this.vaani = new Vaani({
@@ -63,34 +65,35 @@ class StandingByActions {
       return;
     }
 
-    var actions = Object.keys(AppActions.actions);
-    var action = actions.find(function(act) {
-      return ActionsHelper.probeAction(act, command);
+    var actions = Object.keys(this.actionParsers);
+    var actionName = actions.find((act) => {
+      return this.actionParsers[act].probe(command);
     });
 
-    if (!action) {
+    if (!actionName) {
       debug('No action matched.', command);
 
       this.vaani.say('I cannot understand your command.');
       return;
     }
 
-    var param = ActionsHelper.parseResult(action, command);
-    if (!param) {
-      debug('Unable to interpret command.', command);
+    this.actionParsers[actionName].parse(command).then((param) => {
+      if (!param) {
+        debug('Unable to interpret command.', command);
 
-      this.vaani.say('I cannot understand the object of your command.');
+        this.vaani.say('I cannot understand the object of your command.');
 
-      return;
-    }
+        return;
+      }
 
-    var actionInfo = AppActions.actions[action];
-    if (actionInfo.activity) {
-      // Although we can collect multiple actions with the same name, but we
-      // should send the activity to the first one at this stage.
-      // In next stage, we should ask user to choose one app to handle it.
-      ActivityHelper.sendActivity(actionInfo.activity[0], param);
-    }
+      var actionInfo = AppActions.actions[actionName];
+      if (actionInfo.activity) {
+        // Although we can collect multiple actions with the same name, but we
+        // should send the activity to the first one at this stage.
+        // In next stage, we should ask user to choose one app to handle it.
+        ActivityLauncher.sendActivity(actionInfo.activity[0], param);
+      }
+    });
   }
 
   /**
