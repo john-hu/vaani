@@ -22,17 +22,35 @@ var AppActions = {
           });
         }
       });
+      // actions structure:
+      // var a = {
+      //   '{ActionName}': {
+      //     '{TargetType}': [
+      //       { 'InvokeMethodProperty': 'InvokeMethodValue' }
+      //     ]
+      //   }
+      // };
+      // example of target type, invoke method, and value:
+      //    'activity': [{
+      //      'activityName': command.target.activity.name,
+      //      'activityData': command.target.activity.data
+      //    }]
       AppActions.actions = actions;
     };
   },
 
   _parseActions: function(actions, command) {
-    if (!actions[command['@type']]) {
-      actions[command['@type']] = [];
+    var actType = command['@type'];
+    var actObject = command.object || '';
+    if (!actions[actType + '-' + actObject]) {
+      actions[actType + '-' + actObject] = {};
     }
 
-    if (command.target.activity) {
-      actions[command['@type']].push({
+    if (command.target['@type'] === 'activity') {
+      if (!actions[actType + '-' + actObject].activity) {
+        actions[actType + '-' + actObject].activity = [];
+      }
+      actions[actType + '-' + actObject].activity.push({
         'activityName': command.target.activity.name,
         'activityData': command.target.activity.data
       });

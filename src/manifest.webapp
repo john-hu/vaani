@@ -20,8 +20,33 @@
     "voice-command-request": {
       "href": "index.html",
       "disposition": "inline"
+    },
+    "open-app": {
+      "filter": {
+        "type": "webapp",
+        "manifest": {
+          "required": true
+        }
+      },
+      "href": "index.html"
     }
   },
+  "custom_commands": [{
+    "@context": "http://schema.org",
+    "@type": "OpenAction",
+    "object": "SoftwareApplication",
+    "target": {
+      "@type": "activity",
+      "activity": {
+        "name": "open-app",
+        "data": {
+          "type": "webapp",
+          "manifest": "@manifest",
+          "entry_point": "@entry_point"
+        }
+      }
+    }
+  }],
   "default_locale": "en",
   "permissions": {
     "contacts": {

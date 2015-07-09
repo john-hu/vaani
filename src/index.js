@@ -3,6 +3,7 @@ import Debug from 'debug';
 import AppStore from './stores/app';
 import AppActions from './stores/app-actions';
 import DisplayActions from './actions/display';
+import ActivityHandler from './actions/activity-handler';
 import './components/community';
 import './components/display';
 import './components/first-time-use';
@@ -18,6 +19,11 @@ window.myDebug = Debug;
  * start to parse custom commands.
  */
 AppActions.init();
+
+/*
+ * init activity handler
+ */
+ActivityHandler.init();
 
 /*
  * first time use stuff

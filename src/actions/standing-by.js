@@ -2,7 +2,6 @@ import Debug from 'debug';
 import AppStore from '../stores/app';
 import AppActions from '../stores/app-actions';
 import Vaani from '../lib/vaani';
-import AppLauncher from '../lib/app-launcher';
 import TalkieActions from './talkie';
 import ActionsHelper from './actions-helper';
 import ActivityHelper from './activity-helper';
@@ -84,7 +83,13 @@ class StandingByActions {
       return;
     }
 
-    ActivityHelper.sendActivity(AppActions.actions[action][0], param);
+    var actionInfo = AppActions.actions[action];
+    if (actionInfo.activity) {
+      // Although we can collect multiple actions with the same name, but we
+      // should send the activity to the first one at this stage.
+      // In next stage, we should ask user to choose one app to handle it.
+      ActivityHelper.sendActivity(actionInfo.activity[0], param);
+    }
   }
 
   /**
