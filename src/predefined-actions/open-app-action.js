@@ -1,16 +1,20 @@
 import AppLauncher from '../lib/app-launcher';
 
 class OpenAppAction {
+  static get actionName() {
+    return 'OpenAction-SoftwareApplication';
+  }
+
   static get displayText() {
     return 'Open <app name>';
   }
 
   get grammar() {
-    return 'open (phone | messages | email | ' +
-                 'contacts | browser | gallery | ' +
-                 'camera | marketplace | clock | ' +
-                 'settings | calendar | music | ' +
-                 'video)';
+    return Promise.resolve('open (phone | messages | email | ' +
+                           'contacts | browser | gallery | ' +
+                           'camera | marketplace | clock | ' +
+                           'settings | calendar | music | ' +
+                           'video)');
   }
 
   parse (transcript) {
@@ -54,7 +58,7 @@ class OpenAppAction {
                                  'settings|calendar|music|' +
                                  'video)',
                           'gim');
-    return regex.test(transcript);
+    return Promise.resolve(regex.test(transcript));
   }
 }
 

@@ -19,22 +19,26 @@ class StandingByActions {
 
     this.actionParsers = ActionsFactory.createActions();
 
-    var grammars =  `
-      #JSGF v1.0;
-      grammar fxosVoiceCommands;
-      public <fxcmd> = `;
-    var candidates = [];
-    Object.keys(AppActions.actions).forEach((action) => {
-      candidates.push(this.actionParsers[action].grammar);
-    });
-    grammars += candidates.join(' | \n') + ';';
-    this.vaani = new Vaani({
-      grammar: grammars,
-      interpreter: this._interpreter.bind(this),
-      onSay: this._onSay.bind(this),
-      onSayDone: this._onSayDone.bind(this),
-      onListen: this._onListen.bind(this),
-      onListenDone: this._onListenDone.bind(this)
+    Promise.all(Object.keys(AppActions.actions).map((action) => {
+      return this.actionParsers[action].grammar;
+    })).then((results) => {
+      var grammars =  `
+        #JSGF v1.0;
+        grammar fxosVoiceCommands;
+        public <fxcmd> = `;
+      grammars += results.join(' | \n') + ';';
+      this.vaani = new Vaani({
+        grammar: grammars,
+        interpreter: this._interpreter.bind(this),
+        onSay: this._onSay.bind(this),
+        onSayDone: this._onSayDone.bind(this),
+        onListen: this._onListen.bind(this),
+        onListenDone: this._onListenDone.bind(this)
+      });
+      if (this._queuedGreeting) {
+        this.vaani.say('How may I help you?', true);
+        delete this._queuedGreeting;
+      }
     });
   }
 
@@ -44,7 +48,40 @@ class StandingByActions {
   static greetUser () {
     debug('greetUser');
 
-    this.vaani.say('How may I help you?', true);
+    // We may greet user before vaani is ready since we want to support async
+    // function call while building grammar.
+    if (this.vaani) {
+      this.vaani.say('How may I help you?', true);
+    } else {
+      // queue it and wait for vaani ready.
+      this._queuedGreeting = true;
+    }
+
+  }
+
+  static _findParser (command) {
+    return new Promise((resolve, reject) => {
+      var actionNames = Object.keys(this.actionParsers);
+      var idx = 0;
+      var next = () => {
+        if (idx >= actionNames.length) {
+          reject('I cannot understand your command.');
+        }
+        var actionName = actionNames[idx];
+        idx++;
+        this.actionParsers[actionName].probe(command).then((result) => {
+          if (result) {
+            resolve(actionName);
+          } else {
+            next();
+          }
+        }, next).catch((e) => {
+          debug('error: ', e);
+          console.error('error', e);
+        });
+      };
+      next();
+    });
   }
 
   /**
@@ -65,34 +102,27 @@ class StandingByActions {
       return;
     }
 
-    var actions = Object.keys(this.actionParsers);
-    var actionName = actions.find((act) => {
-      return this.actionParsers[act].probe(command);
-    });
+    this._findParser(command).then((actionName) => {
+      this.actionParsers[actionName].parse(command).then((param) => {
+        if (!param) {
+          debug('Unable to interpret command.', command);
 
-    if (!actionName) {
+          this.vaani.say('I cannot understand the object of your command.');
+
+          return;
+        }
+
+        var actionInfo = AppActions.actions[actionName];
+        if (actionInfo.activity) {
+          // Although we can collect multiple actions with the same name, but we
+          // should send the activity to the first one at this stage.
+          // In next stage, we should ask user to choose one app to handle it.
+          ActivityLauncher.sendActivity(actionInfo.activity[0], param);
+        }
+      });
+    }, (reason) => {
       debug('No action matched.', command);
-
       this.vaani.say('I cannot understand your command.');
-      return;
-    }
-
-    this.actionParsers[actionName].parse(command).then((param) => {
-      if (!param) {
-        debug('Unable to interpret command.', command);
-
-        this.vaani.say('I cannot understand the object of your command.');
-
-        return;
-      }
-
-      var actionInfo = AppActions.actions[actionName];
-      if (actionInfo.activity) {
-        // Although we can collect multiple actions with the same name, but we
-        // should send the activity to the first one at this stage.
-        // In next stage, we should ask user to choose one app to handle it.
-        ActivityLauncher.sendActivity(actionInfo.activity[0], param);
-      }
     });
   }
 

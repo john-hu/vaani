@@ -1,12 +1,16 @@
 
 class DialAction {
+  static get actionName() {
+    return 'DialAction-';
+  }
+
   static get displayText() {
     return 'Call/Dial <number>';
   }
 
   get grammar() {
-    return '(call | dial) (one | two | three | four | five | ' +
-                          'six | seven | eight | nine | zero)+';
+    return Promise.resolve('(call | dial) (one | two | three | four | five | ' +
+                                         'six | seven | eight | nine | zero)+');
   }
 
   parse (transcript) {
@@ -36,7 +40,7 @@ class DialAction {
     var regex = new RegExp('(call|dial) (one|two|three|four|five|' +
                                         'six|seven|eight|nine|zero|\s)+',
                               'gim');
-    return regex.test(transcript);
+    return Promise.resolve(regex.test(transcript));
   }
 }
 

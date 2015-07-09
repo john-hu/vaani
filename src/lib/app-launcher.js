@@ -30,7 +30,6 @@ class AppLauncher {
       }
 
       app.launch(entryPoint);
-      console.log('open', manifestURL, entryPoint);
     });
   }
 

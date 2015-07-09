@@ -4,21 +4,17 @@ import OpenAppAction from './open-app-action';
 class ActionsFactory {
 
   static createActions () {
-    return {
-      'DialAction-': new DialAction(), // call <number>
-      'OpenAction-SoftwareApplication': new OpenAppAction() // open <app>
-    };
+    var ret = {};
+    ret[DialAction.actionName] = new DialAction();
+    ret[OpenAppAction.actionName] = new OpenAppAction();
+    return ret;
   }
 
   static getDisplayText(type) {
-    switch ('type') {
-      case 'DialAction-':
-        return DialAction.displayText;
-      case 'OpenAction-SoftwareApplication':
-        return OpenAppAction.displayText;
-      default:
-        return null;
-    }
+    var action = [DialAction, OpenAppAction].find((action) => {
+      return action.actionName === type;
+    });
+    return action ? action.displayText : null;
   }
 }
 
