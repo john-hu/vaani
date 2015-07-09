@@ -20,14 +20,14 @@ class ActionsHelper {
     debug('getActionGrammar', action);
     switch(action) {
       case 'DialAction-':
-        return 'public <dial> = call (one | two | three | four | five | ' +
-                                     'six | seven | eight | nine | zero)+;';
+        return 'call (one | two | three | four | five | ' +
+                                     'six | seven | eight | nine | zero)+';
       case 'OpenAction-SoftwareApplication':
-        return 'public <open-app> = open (phone | messages | email | ' +
+        return 'open (phone | messages | email | ' +
                                          'contacts | browser | gallery | ' +
                                          'camera | marketplace | clock | ' +
                                          'settings | calendar | music | ' +
-                                         'video);';
+                                         'video)';
       default:
         debug('getActionGrammar', 'unsupported action: ' + action);
         return null;

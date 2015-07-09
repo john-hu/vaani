@@ -20,11 +20,12 @@ class StandingByActions {
     var grammars =  `
       #JSGF v1.0;
       grammar fxosVoiceCommands;
-    `;
-    Object.keys(AppActions.actions).forEach(function(action) {
-      grammars += ActionsHelper.getActionGrammar(action);
+      public <fxcmd> = `;
+    var candidates = [];
+    Object.keys(AppActions.actions).forEach((action) => {
+      candidates.push(ActionsHelper.getActionGrammar(action));
     });
-
+    grammars += candidates.join(' | \n') + ';';
     this.vaani = new Vaani({
       grammar: grammars,
       interpreter: this._interpreter.bind(this),
