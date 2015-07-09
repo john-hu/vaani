@@ -1,3 +1,4 @@
+import AppLauncher from '../lib/app-launcher';
 
 class OpenAppAction {
   static get displayText() {
@@ -22,34 +23,24 @@ class OpenAppAction {
                       'gim');
       var matched = regex.exec(transcript);
       if (matched && matched.length > 1) {
-        switch(matched[1]) {
-          case 'phone':
-            resolve({
-              '@manifest': 'app://communications.gaiamobile.org/manifest.webapp',
-              '@entry_point': 'dialer'
+        AppLauncher.findByName(matched[1], (err, app) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          var entryPoint = '';
+          if (app.manifest.entry_points) {
+            // convert key(string) to boolean if found.
+            entryPoint = Object.keys(app.manifest.entry_points).find((key) => {
+              return app.manifest.entry_points[key].name.toLowerCase() ===
+                     matched[1].toLowerCase();;
             });
-          case 'contacts':
-            resolve({
-              '@manifest': 'app://communications.gaiamobile.org/manifest.webapp',
-              '@entry_point': 'contacts'
-            });
-          case 'messges':
-            resolve({
-              '@manifest': 'app://sms.gaiamobile.org/manifest.webapp',
-              '@entry_point': ''
-            });
-          case 'marketplace':
-            resolve({
-              '@manifest': 'https://marketplace.firefox.com/manifest.webapp',
-              '@entry_point': ''
-            });
-          default:
-            resolve({
-              '@manifest': 'app://' + matched[1] +
-                           '.gaiamobile.org/manifest.webapp',
-              '@entry_point': ''
-            });
-        }
+          }
+          resolve({
+            '@manifest': app.manifestURL,
+            '@entry_point': entryPoint
+          });
+        });
       } else {
         reject();
       }
