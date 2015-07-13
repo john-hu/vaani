@@ -5,8 +5,8 @@ class DialAction {
   }
 
   get grammar() {
-    return '(call | dial) (one | two | three | four | five | ' +
-                          'six | seven | eight | nine | zero)+';
+    return '<DialAction-> = (call | dial) (one | two | three | four | ' +
+                           'five | six | seven | eight | nine | zero)+;';
   }
 
   parse (transcript) {

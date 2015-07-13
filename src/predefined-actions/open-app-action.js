@@ -6,11 +6,12 @@ class OpenAppAction {
   }
 
   get grammar() {
-    return 'open (phone | messages | email | ' +
-                 'contacts | browser | gallery | ' +
-                 'camera | marketplace | clock | ' +
-                 'settings | calendar | music | ' +
-                 'video)';
+    return '<OpenAction-SoftwareApplication> = ' +
+               'open (phone | message | email |' +
+               'contacts | browser | gallery | ' +
+               'camera | marketplace | clock | ' +
+               'settings | calendar | music | ' +
+               'video);';
   }
 
   parse (transcript) {

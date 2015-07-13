@@ -23,11 +23,15 @@ class StandingByActions {
       #JSGF v1.0;
       grammar fxosVoiceCommands;
       public <fxcmd> = `;
+    var rules = [];
     var candidates = [];
     Object.keys(AppActions.actions).forEach((action) => {
+      rules.push("<" + action + ">");
       candidates.push(this.actionParsers[action].grammar);
     });
-    grammars += candidates.join(' | \n') + ';';
+    grammars += rules.join('|') + ';\n';
+    grammars += candidates.join('\n');
+
     this.vaani = new Vaani({
       grammar: grammars,
       interpreter: this._interpreter.bind(this),
