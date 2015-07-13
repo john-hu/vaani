@@ -6,8 +6,8 @@ class ActivityLauncher {
 
   static parse (command) {
     return {
-      'activityName': command.target.activity.name,
-      'activityData': command.target.activity.data
+      'activityName': command.target.name,
+      'activityData': command.target.data
     };
   }
 

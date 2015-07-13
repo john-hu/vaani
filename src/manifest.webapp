@@ -36,14 +36,12 @@
     "@type": "OpenAction",
     "object": "SoftwareApplication",
     "target": {
-      "@type": "activity",
-      "activity": {
-        "name": "open-app",
-        "data": {
-          "type": "webapp",
-          "manifest": "@manifest",
-          "entry_point": "@entry_point"
-        }
+      "@type": "WebActivity",
+      "name": "open-app",
+      "data": {
+        "type": "webapp",
+        "manifest": "@manifest",
+        "entry_point": "@entry_point"
       }
     }
   }],

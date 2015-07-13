@@ -6,21 +6,6 @@ var AppActions = {
    * Initialize the app actions. It reads actions from manifests.
    */
   parseAppActions: function() {
-    // actions structure:
-    // var a = {
-    //   '{ActionName}': {
-    //     '{TargetType}': [
-    //       { 'InvokeMethodProperty': 'InvokeMethodValue' }
-    //     ]
-    //   }
-    // };
-    // ActionName is comprised of action and object, like:
-    //   DialAction-, OpenAction-SoftwareApplication.
-    // example of target type, invoke method, and value:
-    //    'activity': [{
-    //      'activityName': command.target.activity.name,
-    //      'activityData': command.target.activity.data
-    //    }]
     AppLauncher.listApps((err, apps) => {
       var actions = {};
       apps.forEach(function(app) {
@@ -43,6 +28,21 @@ var AppActions = {
   },
 
   _parseActions: function(actions, command) {
+    // actions structure:
+    // var a = {
+    //   '{ActionName}': {
+    //     '{TargetType}': [
+    //       { 'InvokeMethodProperty': 'InvokeMethodValue' }
+    //     ]
+    //   }
+    // };
+    // ActionName is comprised of action and object, like:
+    //   DialAction-, OpenAction-SoftwareApplication.
+    // example of target type, invoke method, and value:
+    //    'activity': [{
+    //      'activityName': command.target.activity.name,
+    //      'activityData': command.target.activity.data
+    //    }]
     var actKey = command['@type'] + '-' + (command.object || '');
     if (!actions[actKey]) {
       actions[actKey] = {};
