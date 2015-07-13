@@ -3,7 +3,15 @@ import Debug from 'debug';
 let debug = Debug('ActivityLauncher');
 
 class ActivityLauncher {
-  static formalizeActivityData(data, args) {
+
+  static parse (command) {
+    return {
+      'activityName': command.target.activity.name,
+      'activityData': command.target.activity.data
+    };
+  }
+
+  static formalizeActivityData (data, args) {
     debug('formalizeActivityData', arguments);
     var jsonText = JSON.stringify(data);
     for(var key in args) {
@@ -12,7 +20,7 @@ class ActivityLauncher {
     return JSON.parse(jsonText);
   }
 
-  static sendActivity(action, args) {
+  static execute (action, args) {
     var data = this.formalizeActivityData(action.activityData, args);
     new MozActivity({
       'name': action.activityName,

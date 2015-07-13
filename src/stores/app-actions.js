@@ -1,4 +1,5 @@
-import AppLauncher from '../lib/app-launcher'
+import AppLauncher from '../lib/app-launcher';
+import LauncherFactory from '../launchers/launcher-factory';
 
 var AppActions = {
   /**
@@ -42,20 +43,18 @@ var AppActions = {
   },
 
   _parseActions: function(actions, command) {
-    var actType = command['@type'];
-    var actObject = command.object || '';
-    if (!actions[actType + '-' + actObject]) {
-      actions[actType + '-' + actObject] = {};
+    var actKey = command['@type'] + '-' + (command.object || '');
+    if (!actions[actKey]) {
+      actions[actKey] = {};
     }
 
-    if (command.target['@type'] === 'activity') {
-      if (!actions[actType + '-' + actObject].activity) {
-        actions[actType + '-' + actObject].activity = [];
+    var data = LauncherFactory.parse(command.target['@type'], command);
+    if (data) {
+      actions[actKey]['@type'] = command.target['@type'];
+      if (!actions[actKey][command.target['@type']]) {
+        actions[actKey][command.target['@type']] = [];
       }
-      actions[actType + '-' + actObject].activity.push({
-        'activityName': command.target.activity.name,
-        'activityData': command.target.activity.data
-      });
+      actions[actKey][command.target['@type']].push(data);
     }
   }
 }

@@ -1,9 +1,9 @@
 import Debug from 'debug';
 import AppStore from '../stores/app';
 import AppActions from '../stores/app-actions';
-import ActivityLauncher from '../lib/activity-launcher';
 import Vaani from '../lib/vaani';
 import TalkieActions from './talkie';
+import LauncherFactory from '../launchers/launcher-factory'
 import ActionsFactory from '../predefined-actions/actions-factory';
 
 
@@ -113,12 +113,12 @@ class StandingByActions {
         }
 
         var actionInfo = AppActions.actions[actionName];
-        if (actionInfo.activity) {
-          // Although we can collect multiple actions with the same name, but we
-          // should send the activity to the first one at this stage.
-          // In next stage, we should ask user to choose one app to handle it.
-          ActivityLauncher.sendActivity(actionInfo.activity[0], param);
-        }
+        // Although we can collect multiple actions with the same name, but we
+        // should send the activity to the first one at this stage.
+        // In next stage, we should ask user to choose one app to handle it.
+        LauncherFactory.execute(actionInfo['@type'],
+                                actionInfo[actionInfo['@type']][0],
+                                param);
       });
     }, (reason) => {
       debug('No action matched.', command);
